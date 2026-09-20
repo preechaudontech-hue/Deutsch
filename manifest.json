@@ -1,0 +1,11 @@
+{
+  "name": "บทเรียนภาษาเยอรมัน",
+  "short_name": "DE Lessons",
+  "start_url": "german-lessons.html",
+  "display": "standalone",
+  "background_color": "#f7f8fa",
+  "theme_color": "#b91c1c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

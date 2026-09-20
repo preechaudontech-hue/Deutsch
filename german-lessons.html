@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บทเรียนภาษาเยอรมัน</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#b91c1c">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --text: #1a1a1a;
+    --sub: #6b7280;
+    --accent: #b91c1c;
+    --accent-dark: #7f1d1d;
+    --border: #e5e7eb;
+    --green: #15803d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181c;
+      --card-bg: #23242a;
+      --text: #f2f2f2;
+      --sub: #a1a1aa;
+      --accent: #f87171;
+      --accent-dark: #fca5a5;
+      --border: #33343a;
+      --green: #4ade80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+    padding: 16px;
+    padding-bottom: 48px;
+  }
+  h1 {
+    font-size: 1.2rem;
+    margin: 8px 0 4px;
+  }
+  .sub {
+    color: var(--sub);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: transparent;
+    color: var(--sub);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .view { display: none; }
+  .view.active { display: block; }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .toolbar label {
+    font-size: 0.85rem;
+    color: var(--sub);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  select {
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    transition: opacity .15s;
+  }
+  button:hover { opacity: 0.85; }
+  button.secondary {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .card.playing {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .speak-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .content { flex: 1; min-width: 0; }
+  .de {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .th-pronounce {
+    color: var(--accent-dark);
+    font-size: 0.9rem;
+    margin-top: 2px;
+  }
+  .th-meaning {
+    color: var(--sub);
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+  .num {
+    color: var(--sub);
+    font-size: 0.8rem;
+    flex: 0 0 20px;
+  }
+  .day-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 20px 0 10px;
+  }
+  .notice {
+    background: color-mix(in srgb, var(--accent) 12%, var(--card-bg));
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* Flashcard */
+  .fc-progress {
+    text-align: center;
+    color: var(--sub);
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+  .flashcard {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 20px;
+    text-align: center;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .flashcard .de {
+    font-size: 1.5rem;
+  }
+  .flashcard .answer {
+    display: none;
+  }
+  .flashcard.flipped .answer {
+    display: block;
+  }
+  .flashcard .hint {
+    color: var(--sub);
+    font-size: 0.8rem;
+    margin-top: 8px;
+  }
+  .fc-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .fc-controls button { flex: 1; }
+  .btn-know { background: var(--green); }
+  .btn-unknow { background: var(--sub); }
+  .fc-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .fc-nav button { background: transparent; color: var(--sub); border: 1px solid var(--border); }
+  .fc-speak {
+    margin-top: 6px;
+  }
+  .fc-status-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-top: 8px;
+  }
+  .fc-status-badge.known { background: color-mix(in srgb, var(--green) 20%, transparent); color: var(--green); }
+  .fc-status-badge.unknown { background: color-mix(in srgb, var(--sub) 20%, transparent); color: var(--sub); }
+
+  /* Progress */
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    flex: 1;
+    min-width: 100px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-box .num-big {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-box .label {
+    font-size: 0.78rem;
+    color: var(--sub);
+    margin-top: 2px;
+  }
+  .day-row {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .day-row input[type=checkbox] {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--accent);
+  }
+  .day-row .day-info { flex: 1; }
+  .day-row .day-name { font-weight: 600; font-size: 0.95rem; }
+  .day-row .day-date { color: var(--sub); font-size: 0.78rem; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<h1>🇩🇪 บทเรียนภาษาเยอรมัน</h1>
+<div class="sub">เรียนวันละ 5-10 ประโยค — ใช้คู่กับ <code>german-lessons.md</code></div>
+
+<div id="unsupported" class="notice">
+  เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง (Web Speech API) — ลองเปิดด้วย Chrome หรือ Edge แทนครับ
+</div>
+<div id="noVoiceNotice" class="notice">
+  ⚠️ ไม่พบเสียงพูดภาษาเยอรมัน (de-DE) ในเครื่องนี้ — เสียงที่เล่นอาจใช้เสียงอื่นแทนและออกเสียงไม่ถูกต้อง<br>
+  วิธีแก้บน Windows: Settings → Time &amp; Language → Language &amp; region → Add a language → เลือก <b>Deutsch (Deutschland)</b> แล้วติดตั้ง Speech pack จากนั้นรีเฟรชหน้านี้
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="learn">📖 เรียน</button>
+  <button class="tab-btn" data-tab="flashcard">🃏 Flashcard</button>
+  <button class="tab-btn" data-tab="progress">📊 ความคืบหน้า</button>
+</div>
+
+<!-- ===== TAB: เรียน ===== -->
+<div class="view active" id="view-learn">
+  <div class="toolbar">
+    <button id="playAllBtn">▶️ ฟังทั้งหมด</button>
+    <button id="stopBtn" class="secondary">⏹ หยุด</button>
+    <label>ความเร็ว
+      <select id="rateSelect">
+        <option value="0.7">ช้า</option>
+        <option value="1" selected>ปกติ</option>
+        <option value="1.2">เร็ว</option>
+      </select>
+    </label>
+    <label>เสียง
+      <select id="voiceSelect"><option>กำลังโหลด...</option></select>
+    </label>
+  </div>
+  <div id="voiceInfo" class="sub" style="margin-top:-10px;"></div>
+
+  <div id="lessons"></div>
+</div>
+
+<!-- ===== TAB: Flashcard ===== -->
+<div class="view" id="view-flashcard">
+  <div class="fc-progress" id="fcProgress"></div>
+  <div class="flashcard" id="flashcardEl">
+    <div class="de" id="fcDe"></div>
+    <div class="answer">
+      <div class="th-pronounce" id="fcPronounce"></div>
+      <div class="th-meaning" id="fcMeaning"></div>
+    </div>
+    <div class="hint" id="fcHint">แตะการ์ดเพื่อดูคำตอบ</div>
+    <div id="fcBadge"></div>
+  </div>
+  <div style="text-align:center;">
+    <button id="fcSpeakBtn" class="secondary fc-speak">🔊 ฟังเสียง</button>
+  </div>
+  <div class="fc-controls">
+    <button id="fcUnknownBtn" class="btn-unknow">❌ ยังไม่ได้</button>
+    <button id="fcKnownBtn" class="btn-know">✅ จำได้</button>
+  </div>
+  <div class="fc-nav">
+    <button id="fcPrevBtn">← ก่อนหน้า</button>
+    <button id="fcShuffleBtn">🔀 สลับสุ่ม</button>
+    <button id="fcNextBtn">ถัดไป →</button>
+  </div>
+</div>
+
+<!-- ===== TAB: ความคืบหน้า ===== -->
+<div class="view" id="view-progress">
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="num-big" id="statDaysDone">0</div>
+      <div class="label">วันที่เรียนแล้ว</div>
+    </div>
+    <div class="stat-box">
+      <div class="num-big" id="statKnown">0</div>
+      <div class="label">คำที่จำได้</div>
+    </div>
+    <div class="stat-box">
+      <div class="num-big" id="statTotal">0</div>
+      <div class="label">ประโยคทั้งหมด</div>
+    </div>
+  </div>
+  <div id="dayList"></div>
+</div>
+
+<script>
+const lessonData = [
+  {
+    day: 1,
+    topic: "ทักทาย / แนะนำตัว (Begrüßung / Sich vorstellen)",
+    sentences: [
+      { de: "Hallo!", th_pronounce: "ฮัลโล", th_meaning: "สวัสดี (ไม่เป็นทางการ)" },
+      { de: "Guten Tag!", th_pronounce: "กูเทิน ทาก", th_meaning: "สวัสดี (เป็นทางการ, ใช้กลางวัน)" },
+      { de: "Ich heiße ...", th_pronounce: "อิ๊ช ไฮเซอ ...", th_meaning: "ผม/ฉันชื่อ ..." },
+      { de: "Wie heißen Sie?", th_pronounce: "วี ไฮเซิน ซี", th_meaning: "คุณชื่ออะไร (สุภาพ)" },
+      { de: "Ich komme aus Thailand.", th_pronounce: "อิ๊ช คอมเมอ เอาส์ ไทยลันด์", th_meaning: "ผมมาจากประเทศไทย" },
+      { de: "Ich bin Lehrer.", th_pronounce: "อิ๊ช บิน เลเรอร์", th_meaning: "ผมเป็นครู" },
+      { de: "Ich unterrichte Informatik.", th_pronounce: "อิ๊ช อุนเทอร์ริชเทอ อินฟอร์มาทิค", th_meaning: "ผมสอนวิชาคอมพิวเตอร์/ไอที" },
+      { de: "Freut mich!", th_pronounce: "ฟรอยท์ มิช", th_meaning: "ยินดีที่ได้รู้จัก" },
+      { de: "Auf Wiedersehen!", th_pronounce: "เอาฟ์ วีเดอร์เซเฮิน", th_meaning: "ลาก่อน (เป็นทางการ)" },
+      { de: "Bis bald!", th_pronounce: "บิส บัลด์", th_meaning: "แล้วเจอกัน" }
+    ]
+  }
+];
+
+// ===== Flatten sentences with stable keys for localStorage =====
+const allSentences = [];
+lessonData.forEach(day => {
+  day.sentences.forEach((s, i) => {
+    allSentences.push({ key: `d${day.day}-s${i}`, day: day.day, ...s });
+  });
+});
+
+// ===== localStorage helpers =====
+const LS_DAYS = 'de-app-days-done';
+const LS_CARDS = 'de-app-flashcard-status';
+
+function loadDaysDone() {
+  try { return JSON.parse(localStorage.getItem(LS_DAYS)) || {}; } catch (e) { return {}; }
+}
+function saveDaysDone(obj) {
+  try { localStorage.setItem(LS_DAYS, JSON.stringify(obj)); } catch (e) {}
+}
+function loadCardStatus() {
+  try { return JSON.parse(localStorage.getItem(LS_CARDS)) || {}; } catch (e) { return {}; }
+}
+function saveCardStatus(obj) {
+  try { localStorage.setItem(LS_CARDS, JSON.stringify(obj)); } catch (e) {}
+}
+
+// ===== Tabs =====
+const tabBtns = document.querySelectorAll('.tab-btn');
+const views = {
+  learn: document.getElementById('view-learn'),
+  flashcard: document.getElementById('view-flashcard'),
+  progress: document.getElementById('view-progress')
+};
+tabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(views).forEach(v => v.classList.remove('active'));
+    views[btn.dataset.tab].classList.add('active');
+    stopAll();
+    if (btn.dataset.tab === 'progress') renderProgress();
+    if (btn.dataset.tab === 'flashcard') renderFlashcard();
+  });
+});
+
+// ===== Speech setup (shared) =====
+const unsupportedEl = document.getElementById('unsupported');
+const noVoiceEl = document.getElementById('noVoiceNotice');
+const voiceSelect = document.getElementById('voiceSelect');
+const voiceInfoEl = document.getElementById('voiceInfo');
+const rateSelect = document.getElementById('rateSelect');
+const playAllBtn = document.getElementById('playAllBtn');
+const stopBtn = document.getElementById('stopBtn');
+const lessonsEl = document.getElementById('lessons');
+
+const supported = 'speechSynthesis' in window;
+if (!supported) {
+  unsupportedEl.style.display = 'block';
+  playAllBtn.disabled = true;
+}
+
+const KNOWN_GENDER = {
+  'katja': 'หญิง', 'hedwig': 'หญิง', 'petra': 'หญิง', 'marlene': 'หญิง',
+  'vicki': 'หญิง', 'anna': 'หญิง', 'ingrid': 'หญิง', 'elke': 'หญิง',
+  'conrad': 'ชาย', 'stefan': 'ชาย', 'markus': 'ชาย', 'michael': 'ชาย', 'ralf': 'ชาย'
+};
+function guessGender(voiceName) {
+  const lower = voiceName.toLowerCase();
+  for (const key in KNOWN_GENDER) {
+    if (lower.includes(key)) return KNOWN_GENDER[key];
+  }
+  return 'ไม่ทราบเพศ';
+}
+
+let germanVoices = [];
+let selectedVoiceURI = null;
+
+function checkGermanVoice() {
+  if (!supported) return;
+  const voices = window.speechSynthesis.getVoices();
+  germanVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('de'));
+  noVoiceEl.style.display = germanVoices.length ? 'none' : 'block';
+  populateVoiceSelect();
+}
+
+function populateVoiceSelect() {
+  voiceSelect.innerHTML = '';
+  if (!germanVoices.length) {
+    voiceSelect.innerHTML = '<option>ไม่มีเสียงเยอรมัน</option>';
+    voiceInfoEl.textContent = '';
+    return;
+  }
+  germanVoices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.voiceURI;
+    opt.textContent = `${v.name} (${guessGender(v.name)})`;
+    voiceSelect.appendChild(opt);
+  });
+  if (!selectedVoiceURI || !germanVoices.some(v => v.voiceURI === selectedVoiceURI)) {
+    selectedVoiceURI = germanVoices[0].voiceURI;
+  }
+  voiceSelect.value = selectedVoiceURI;
+  updateVoiceInfo();
+}
+
+function updateVoiceInfo() {
+  const v = germanVoices.find(v => v.voiceURI === selectedVoiceURI);
+  voiceInfoEl.textContent = v ? `กำลังใช้เสียง: ${v.name} — ${guessGender(v.name)} (${v.lang})` : '';
+}
+
+voiceSelect.addEventListener('change', () => {
+  selectedVoiceURI = voiceSelect.value;
+  updateVoiceInfo();
+});
+
+if (supported) {
+  checkGermanVoice();
+  window.speechSynthesis.onvoiceschanged = checkGermanVoice;
+}
+
+let allUtteranceQueue = [];
+let queueIndex = 0;
+let isPlayingAll = false;
+
+function pickGermanVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const selected = voices.find(v => v.voiceURI === selectedVoiceURI);
+  return selected || voices.find(v => v.lang === 'de-DE') || voices.find(v => v.lang && v.lang.startsWith('de')) || null;
+}
+
+function speakText(text, card, onEnd) {
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'de-DE';
+  const voice = pickGermanVoice();
+  if (voice) utter.voice = voice;
+  utter.rate = parseFloat(rateSelect.value);
+  if (card) card.classList.add('playing');
+  utter.onend = () => {
+    if (card) card.classList.remove('playing');
+    if (onEnd) onEnd();
+  };
+  utter.onerror = () => {
+    if (card) card.classList.remove('playing');
+    if (onEnd) onEnd();
+  };
+  window.speechSynthesis.speak(utter);
+}
+
+function stopAll() {
+  isPlayingAll = false;
+  queueIndex = 0;
+  if (supported) window.speechSynthesis.cancel();
+  document.querySelectorAll('.card.playing').forEach(c => c.classList.remove('playing'));
+}
+
+function playAll() {
+  if (!supported) return;
+  stopAll();
+  isPlayingAll = true;
+  queueIndex = 0;
+  playNextInQueue();
+}
+
+function playNextInQueue() {
+  if (!isPlayingAll || queueIndex >= allUtteranceQueue.length) {
+    isPlayingAll = false;
+    return;
+  }
+  const { text, card } = allUtteranceQueue[queueIndex];
+  speakText(text, card, () => {
+    queueIndex++;
+    playNextInQueue();
+  });
+}
+
+// ===== Render: เรียน (list view) =====
+function renderLearn() {
+  allUtteranceQueue = [];
+  lessonsEl.innerHTML = '';
+
+  lessonData.forEach(day => {
+    const title = document.createElement('div');
+    title.className = 'day-title';
+    title.textContent = `Day ${day.day}: ${day.topic}`;
+    lessonsEl.appendChild(title);
+
+    day.sentences.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = i + 1;
+
+      const speakBtn = document.createElement('button');
+      speakBtn.className = 'speak-btn';
+      speakBtn.textContent = '🔊';
+      speakBtn.setAttribute('aria-label', 'ฟังเสียง ' + s.de);
+      speakBtn.disabled = !supported;
+      speakBtn.onclick = () => {
+        stopAll();
+        speakText(s.de, card);
+      };
+
+      const content = document.createElement('div');
+      content.className = 'content';
+      content.innerHTML = `
+        <div class="de">${s.de}</div>
+        <div class="th-pronounce">${s.th_pronounce}</div>
+        <div class="th-meaning">${s.th_meaning}</div>
+      `;
+
+      card.appendChild(num);
+      card.appendChild(speakBtn);
+      card.appendChild(content);
+      lessonsEl.appendChild(card);
+
+      allUtteranceQueue.push({ text: s.de, card });
+    });
+  });
+}
+
+playAllBtn.addEventListener('click', playAll);
+stopBtn.addEventListener('click', stopAll);
+
+// ===== Flashcard mode =====
+let fcOrder = allSentences.map((_, i) => i);
+let fcIndex = 0;
+let fcFlipped = false;
+
+const flashcardEl = document.getElementById('flashcardEl');
+const fcDe = document.getElementById('fcDe');
+const fcPronounce = document.getElementById('fcPronounce');
+const fcMeaning = document.getElementById('fcMeaning');
+const fcHint = document.getElementById('fcHint');
+const fcBadge = document.getElementById('fcBadge');
+const fcProgress = document.getElementById('fcProgress');
+const fcSpeakBtn = document.getElementById('fcSpeakBtn');
+
+function currentCard() {
+  return allSentences[fcOrder[fcIndex]];
+}
+
+function renderFlashcard() {
+  if (!allSentences.length) return;
+  const card = currentCard();
+  const statusMap = loadCardStatus();
+  const status = statusMap[card.key];
+
+  fcDe.textContent = card.de;
+  fcPronounce.textContent = card.th_pronounce;
+  fcMeaning.textContent = card.th_meaning;
+  fcFlipped = false;
+  flashcardEl.classList.remove('flipped');
+  fcHint.textContent = 'แตะการ์ดเพื่อดูคำตอบ';
+  fcProgress.textContent = `การ์ดที่ ${fcIndex + 1} / ${allSentences.length}`;
+
+  if (status === 'known') {
+    fcBadge.innerHTML = '<span class="fc-status-badge known">✅ เคยจำได้</span>';
+  } else if (status === 'unknown') {
+    fcBadge.innerHTML = '<span class="fc-status-badge unknown">❌ ยังไม่คล่อง</span>';
+  } else {
+    fcBadge.innerHTML = '';
+  }
+}
+
+flashcardEl.addEventListener('click', () => {
+  fcFlipped = !fcFlipped;
+  flashcardEl.classList.toggle('flipped', fcFlipped);
+  fcHint.textContent = fcFlipped ? '' : 'แตะการ์ดเพื่อดูคำตอบ';
+});
+
+fcSpeakBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const card = currentCard();
+  speakText(card.de);
+});
+
+function markCard(status) {
+  const card = currentCard();
+  const statusMap = loadCardStatus();
+  statusMap[card.key] = status;
+  saveCardStatus(statusMap);
+  goNextCard();
+}
+
+document.getElementById('fcKnownBtn').addEventListener('click', () => markCard('known'));
+document.getElementById('fcUnknownBtn').addEventListener('click', () => markCard('unknown'));
+
+function goNextCard() {
+  fcIndex = (fcIndex + 1) % fcOrder.length;
+  renderFlashcard();
+}
+function goPrevCard() {
+  fcIndex = (fcIndex - 1 + fcOrder.length) % fcOrder.length;
+  renderFlashcard();
+}
+document.getElementById('fcNextBtn').addEventListener('click', goNextCard);
+document.getElementById('fcPrevBtn').addEventListener('click', goPrevCard);
+
+document.getElementById('fcShuffleBtn').addEventListener('click', () => {
+  for (let i = fcOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [fcOrder[i], fcOrder[j]] = [fcOrder[j], fcOrder[i]];
+  }
+  fcIndex = 0;
+  renderFlashcard();
+});
+
+// ===== Progress tab =====
+function renderProgress() {
+  const daysDone = loadDaysDone();
+  const cardStatus = loadCardStatus();
+
+  const daysDoneCount = Object.keys(daysDone).filter(k => daysDone[k]).length;
+  const knownCount = Object.values(cardStatus).filter(v => v === 'known').length;
+
+  document.getElementById('statDaysDone').textContent = daysDoneCount;
+  document.getElementById('statKnown').textContent = knownCount;
+  document.getElementById('statTotal').textContent = allSentences.length;
+
+  const dayListEl = document.getElementById('dayList');
+  dayListEl.innerHTML = '';
+
+  lessonData.forEach(day => {
+    const row = document.createElement('div');
+    row.className = 'day-row';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    const dayKey = 'day' + day.day;
+    const entry = daysDone[dayKey];
+    checkbox.checked = !!(entry && entry.done);
+
+    const info = document.createElement('div');
+    info.className = 'day-info';
+    const dateText = entry && entry.date ? `เรียนเมื่อ ${entry.date}` : 'ยังไม่ได้ติ๊ก';
+    info.innerHTML = `<div class="day-name">Day ${day.day}: ${day.topic}</div><div class="day-date">${dateText}</div>`;
+
+    checkbox.addEventListener('change', () => {
+      const d = loadDaysDone();
+      if (checkbox.checked) {
+        d[dayKey] = { done: true, date: new Date().toLocaleDateString('th-TH') };
+      } else {
+        d[dayKey] = { done: false, date: null };
+      }
+      saveDaysDone(d);
+      renderProgress();
+    });
+
+    row.appendChild(checkbox);
+    row.appendChild(info);
+    dayListEl.appendChild(row);
+  });
+}
+
+// ===== Init =====
+renderLearn();
+renderFlashcard();
+</script>
+
+</body>
+</html>
